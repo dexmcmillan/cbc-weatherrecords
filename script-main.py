@@ -8,6 +8,8 @@ airports_list = pd.read_csv("airport_ids.csv").index.to_list()
 li = []
 
 today = dt.datetime.today()
+yesterday = (dt.datetime.today() - dt.timedelta(days=1)).day
+print(yesterday)
 day = today.day
 month = today.month
 year = today.year
@@ -28,19 +30,23 @@ raw["Climate ID"] = raw["Climate ID"].astype(str)
 
 raw.to_csv("data/data-raw.csv")
 
-start_date = "2017-01-01"
+start_date = "2022-05-01"
 
 mydates = pd.date_range(start_date, today)
 mydates = pd.to_datetime(mydates.date).astype(str).to_list()
 
-days_list = []
 
-for metric in ["Min Temp (°C)", "Max Temp (°C)"]:
+for metric in [ "Max Temp (°C)", "Min Temp (°C)"]:
+    
+    days_list = []
     
     previous_data = pd.read_csv(f"data/{metric.lower()}-dayssincerecord.csv")
+    print(previous_data.columns)
     
     dates = previous_data.loc[previous_data["Unnamed: 0"] >= start_date, "Unnamed: 0"].to_list()
-    unique_dates = [elem for elem in dates if elem not in mydates ]
+    unique_dates = [elem for elem in mydates if elem not in dates ]
+    
+    print(f"New dates: {', '.join(unique_dates)}")
     
     if len(unique_dates) > 0:
 
@@ -75,6 +81,8 @@ for metric in ["Min Temp (°C)", "Max Temp (°C)"]:
 
             max_values = df.pivot_table(index="Station Name", values=["days_since_record"], aggfunc="min").sort_values("days_since_record")
             max_values["date"] = max_values["days_since_record"].apply(lambda x: pd.to_datetime(date) - timedelta(days=x)).astype(str).str.slice(0, 10)
+            
+            print(max_values)
 
             locations = (data
                         .loc[:, ["Station Name", "Latitude (y)", "Longitude (x)"]]
@@ -102,6 +110,9 @@ for metric in ["Min Temp (°C)", "Max Temp (°C)"]:
             days_list.append(final)
             
         new_days = pd.concat(days_list, axis=1).transpose()
+        previous_data = previous_data.set_index("Unnamed: 0")
+        
+        print(new_days.columns)
         
         export = pd.concat([previous_data, new_days])
 

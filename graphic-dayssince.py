@@ -25,7 +25,7 @@ for metric in ["hot", "cold"]:
         
     raw = raw.dropna()
 
-    today = raw.tail(1).transpose().drop("Unnamed: 0")
+    today = raw.tail(1).transpose().drop(["Unnamed: 0"])
     today.columns = ["Days since record"]
     today["Days since record"] = today["Days since record"].astype(int)
     today = today.sort_values("Days since record", ascending=False).reset_index()
@@ -38,7 +38,7 @@ for metric in ["hot", "cold"]:
 
     metadata_update = {
                 "annotate": {
-                    "notes": f"Last updated on {date} at {time}. Temperature data for each city is based on readings at airport weather stations. Some weather stations have not been operational every day going back to 1980.".replace(" 0", " ")
+                    "notes": f"Last updated on {date} at {time} Temperature data for each city is based on readings at airport weather stations. Some weather stations have not been operational every day going back to 1980.".replace(" 0", " ")
                 }
             }
     
